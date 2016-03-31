@@ -1,0 +1,34 @@
+#!/usr/bin/perl
+
+
+$mysql='mysql';
+$mysqldump='mysqldump';
+
+@date=`/bin/date +%Y%m%d`;
+$date = $date[0];
+chomp($date);
+
+#print "$date\n";
+
+$dir="/backup/$date";
+mkdir($dir);
+chdir($dir);
+
+@hostname=`hostname`;
+$hostname=$hostname[0];
+chomp($hostname);
+
+my(@dbs) = `$mysql --defaults-file=/etc/mysql/debian.cnf -Bse \"show databases\"`;
+my($out) = '';
+foreach $d (@dbs){
+    chomp($d);
+    if (($d ne 'information_schema') && ($d ne 'performance_schema')){
+#	$out .= "$mysqldump $d |gzip >$dir/$hostname-$date-$d.sql.gz\n";
+	$out .= `$mysqldump  --defaults-file=/etc/mysql/debian.cnf --single-transaction $d |gzip >$dir/$hostname-$date-$d.sql.gz`;
+    }
+}
+
+#$out .= '';
+
+#print $out;
+
